@@ -1,0 +1,114 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ConsoleUI
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            //constants
+            int populationSize = 100;
+            int sequenceSize = 10;
+            int generations = 100;
+            int idealSum = 38;
+            int idealProduct = 210;
+
+            Console.WriteLine("ideal sum {0}, ideal product {1}\n", idealSum, idealProduct);
+
+            Chromosome Chromosome = new Chromosome();
+            
+            List<int> originalList = new List<int>() {1,2,3,4,5,6,7,8,9,10};
+
+            List<List<int>> oldPopulationList = new List<List<int>>();
+            List<double> oldFitnessList = new List<double>();
+            List<List<int>> newPopulationList = new List<List<int>>();
+            List<double> newFitnessList = new List<double>();
+
+            //Generate first generation
+            while(oldPopulationList.Count < populationSize)
+            {
+                oldPopulationList.Add(Chromosome.GetBinaryList(sequenceSize));
+            }
+
+            for (int i = 0; i < populationSize; i++)
+            {                
+                oldFitnessList.Add(Chromosome.GetFitness(oldPopulationList[i], originalList, idealSum, idealProduct));
+            }
+
+            //Generation loop
+            for(int k = 0; k < generations; k++)
+            {
+                // Generate second generation
+                for(int i = 0; i < (populationSize/2); i++)
+                {
+                    //get best binseqs (two instances so no duplicates)
+                    int fittestBinseq = Chromosome.GetFittestSequenceIndex(oldPopulationList, oldFitnessList);
+                    int fittestBinseq2 = Chromosome.GetFittestSequenceIndex(oldPopulationList, oldFitnessList);
+
+                    //Copies fittest binseq from old populationList, passes through crossover, and adds to newPopulationList
+                    newPopulationList.Add(Chromosome.Crossover( 
+                        (oldPopulationList[fittestBinseq]), (oldPopulationList[fittestBinseq2]), sequenceSize, true ));
+
+                    newPopulationList.Add(Chromosome.Crossover( 
+                        (oldPopulationList[fittestBinseq]), (oldPopulationList[fittestBinseq2]), sequenceSize, false ));
+                }
+                //Get fitness of new generation
+                for(int i = 0; i < populationSize; i++)
+                {
+                    double fitness = Chromosome.GetFitness(newPopulationList[i], originalList, idealSum, idealProduct);
+                    newFitnessList.Add(fitness);
+                }
+            
+                //prints data
+                Console.WriteLine("Generation {0} Population List", k);
+                PrintListofLists(oldPopulationList);
+
+                Console.WriteLine("Generation {0} Fitness List", k);
+                DoubleListPrint(oldFitnessList);
+
+                oldPopulationList.Clear();
+                newPopulationList.ForEach(val => { oldPopulationList.Add(val); });
+                newPopulationList.Clear();
+
+                oldFitnessList.Clear();
+                newFitnessList.ForEach(val => { oldFitnessList.Add(val); });
+                newFitnessList.Clear();
+            }
+
+            Console.ReadKey(); 
+        } 
+
+        private static void StringListPrint(List<string> stringList)
+        {
+            for (int i = 0; i < stringList.Count; i++)
+            {
+                Console.WriteLine("{1}", stringList[i]);
+            }
+            Console.WriteLine();
+        }
+        private static void DoubleListPrint(List<double> doubleList)
+        {
+            for (int i = 0; i < doubleList.Count; i++)
+            {
+                Console.WriteLine("{0}",doubleList[i]);
+            }
+            Console.WriteLine();
+        }
+        private static void PrintListofLists(List<List<int>> listList)
+        {
+            foreach( List<int> binseq in listList)
+            {
+                foreach (int i in binseq)
+                {
+                    Console.Write(i);
+                }
+                Console.WriteLine();
+            }
+            Console.WriteLine();
+        }
+    }
+}
+

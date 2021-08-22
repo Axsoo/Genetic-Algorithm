@@ -1,0 +1,142 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ConsoleUI
+{
+    class Chromosome
+    {
+        Random rand = new Random(100);
+
+        public List<int> GetBinaryList(int size)
+        {
+            List<int> list = new List<int>();
+
+            for(int i = 0; i < size; i++)
+            {
+                list.Add(rand.Next(0, 2));
+            }
+            return list;
+        }
+
+        public double GetFitness(List<int> listIn, List<int> originalIn, int idealSumIn, int idealProdIn)
+        {
+            int sum = 0;
+            int product = 1;
+            double fitness = 0;
+
+            for (int i = 0; i < listIn.Count; i++)
+            {
+                if (listIn[i] == 0)
+                {
+                    sum += originalIn[i];
+                }
+            }
+            for (int i = 0; i < listIn.Count; i++)
+            {
+                if (listIn[i] == 1)
+                {
+                    product *= originalIn[i];
+                }
+            }
+
+            fitness = Math.Pow((sum - idealSumIn), 2) + Math.Pow((product - idealProdIn), 2);
+            fitness = Math.Sqrt(fitness);
+            fitness = 1 / ((fitness) + 1);
+            return fitness;
+
+        }
+
+        public int GetFittestSequenceIndex(List<List<int>> binarySequenceListIn, List<double> fitnessListIn)
+        {
+            List<double> probabilityList = new List<double>();
+            double totalFitness = 0;
+            double incrementor = 0.065;
+            int resultIndex = -1;
+            double upperDouble = 1;
+            int randomIndex = 0;
+
+            foreach (double fitness in fitnessListIn)
+            {
+                totalFitness += fitness;
+            }
+
+            //Makes a probability-list
+            for (int i = 0; i < binarySequenceListIn.Count; i++)
+            {
+                probabilityList.Add((fitnessListIn[i]) / totalFitness);
+            }
+
+            randomIndex = rand.Next(0, probabilityList.Count);
+
+            //Gets index
+            while (resultIndex < 0)
+            {
+                double randomProbability = probabilityList[randomIndex];
+
+                if (randomProbability > upperDouble)
+                {
+                    resultIndex = randomIndex;
+                }
+                else
+                {
+                    randomIndex = rand.Next(0, probabilityList.Count);
+                    upperDouble -= incrementor;
+                }
+            }
+
+            //probabilityList.Clear();
+            return resultIndex;
+        }
+
+        public List<int> Crossover(List<int> intListIn1, List<int> intListin2, int sequenceSizeIn, bool first)
+        {
+            int RandomIndex = rand.Next(0, sequenceSizeIn);
+
+            List<int> resultListFirst = new List<int>();
+            List<int> resultListSecond = new List<int>();
+            List<int> resultList = new List<int>();
+
+
+
+            if (first == true)
+            {
+                resultListFirst = intListIn1.GetRange(0, RandomIndex);
+                resultListSecond = intListin2.GetRange(RandomIndex, (sequenceSizeIn - RandomIndex));
+                resultListFirst.AddRange(resultListSecond);
+                resultList.AddRange(resultListFirst);
+            }
+            else
+            {
+                resultListFirst = intListIn1.GetRange(RandomIndex, (sequenceSizeIn - RandomIndex));
+                resultListSecond = intListin2.GetRange(0, RandomIndex);
+                resultListSecond.AddRange(resultListFirst);
+                resultList.AddRange(resultListSecond);
+            }
+
+            if (rand.Next(0, 10000) < 40)
+            {
+                int randomZeroOrOne = rand.Next(0, 2);
+                int random = rand.Next(0, sequenceSizeIn);
+
+                switch (randomZeroOrOne)
+                {
+
+                    case 0:
+                        resultList[random] = 0;
+                        break;
+
+                    case 1:
+                        resultList[random] = 1;
+                        break;
+
+                }
+
+            }
+
+            return resultList;
+        }
+    }
+}

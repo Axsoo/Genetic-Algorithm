@@ -1,0 +1,89 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ConsoleUI
+{
+    class Program
+    {
+        static void Main(string[] args)
+        { 
+            int[] original = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+            int idealSum = 38;
+            int idealProd = 210;
+            int startPopSize = 10;
+            //object[,] originalPopulationArr = new object[10, 2];
+            object[][] originalPopulationArr = new object[][] { };
+            //int[,] binseqArray = new int[10,10];
+
+
+            Console.WriteLine("ideal sum {0}, ideal product {1}\n", idealSum, idealProd);
+
+            //Instantiate chromosome class
+            Chromosome Chrom = new Chromosome();
+
+            //Instantiate lists
+            List<string> binSeqList = new List<string>();
+            List<double> fitnessList = new List<double>();
+
+            //LOOP START until pop x = pop x+1
+
+            //population generator
+            for (int i = 0; i < startPopSize; i++)
+            {
+                // Get sequence
+                int[] binSeq = Chrom.GenerateBinarySequence();
+                Console.WriteLine("{0} : {1}",i, String.Join("", binSeq));
+
+                originalPopulationArr[i][0] = binSeq;
+
+                //Get result of sequence
+                int resAdd = Chrom.ChromosomeResultAddZero(binSeq, original);
+                int resMult = Chrom.ChromosomeResultMultOne(binSeq, original);
+                Console.WriteLine("sum {0}, product {1}", resAdd, resMult);
+
+                //Get fitness
+                double fitness = Chrom.GetFitness(resAdd, resMult, idealSum, idealProd);
+                Console.WriteLine("Fitness : {0} \n", fitness);
+
+                originalPopulationArr[i][1] = fitness;
+            }
+
+            //debug printing array values
+            ArrayPrint(originalPopulationArr);
+
+            
+            // choose max 2 chromosomes according to probabilty
+            //calculate sum of all fitness
+
+          /*  for (int i = 0; i < 10; i++)
+            {
+                double fitsum = 0;
+                fitsum += (double)originalPopulationArr[i, 1];   
+            }
+
+            Console.ReadKey(); */
+        } 
+
+        private static void ArrayPrint(object[][] originalPopulationArrIn)
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                for (int j = 0; j < 2; j++)
+                {
+                    //binseq column
+                    if (j == 0)
+                        for (int k = 0; k < 10; k++)
+                        {
+                            Console.WriteLine("superArr[{0},{1}] = {2}", i, j, originalPopulationArrIn[i][k],[j]);
+                        }
+                    //fitness column
+                    if (j == 1)
+                    Console.WriteLine("superArr[{0},{1}] = {2}", i, j, originalPopulationArrIn[i][j]);
+                }
+            }
+        }
+    }
+}
+
